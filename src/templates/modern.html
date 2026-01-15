@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ personal.nombre }} - CV</title>
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                background: #e5e7eb;
+                font-family:
+                    Inter,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    Arial,
+                    sans-serif;
+                color: #111827;
+            }
+
+            /* ===== PAGE ===== */
+            .page {
+                width: 900px;
+                height: 1120px;
+                margin: 30px auto;
+                background: #ffffff;
+                padding: 48px 56px;
+            }
+
+            /* ===== HEADER ===== */
+            .header {
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 24px;
+                margin-bottom: 32px;
+            }
+
+            .name {
+                font-size: 32px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            .role {
+                font-size: 16px;
+                font-weight: 600;
+                color: #2563eb;
+                margin-top: 4px;
+            }
+
+            .contact {
+                margin-top: 14px;
+                font-size: 13px;
+                color: #4b5563;
+            }
+
+            .contact span {
+                margin-right: 14px;
+            }
+
+            /* ===== SECTION ===== */
+            .section {
+                margin-bottom: 34px;
+            }
+
+            .section-title {
+                font-size: 15px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #111827;
+                margin-bottom: 16px;
+            }
+
+            /* ===== PROFILE ===== */
+            .profile {
+                font-size: 15px;
+                line-height: 1.6;
+                color: #374151;
+            }
+
+            /* ===== EXPERIENCE ===== */
+            .timeline {
+                border-left: 2px solid #e5e7eb;
+                padding-left: 24px;
+            }
+
+            .job {
+                position: relative;
+                margin-bottom: 26px;
+            }
+
+            .job::before {
+                content: "";
+                position: absolute;
+                left: -31px;
+                top: 4px;
+                width: 10px;
+                height: 10px;
+                background: #2563eb;
+                border-radius: 50%;
+            }
+
+            .job-header {
+                display: table;
+                width: 100%;
+            }
+
+            .job-title {
+                display: table-cell;
+                font-weight: 700;
+                font-size: 16px;
+            }
+
+            .job-date {
+                display: table-cell;
+                text-align: right;
+                font-size: 12px;
+                color: #6b7280;
+                font-weight: 600;
+            }
+
+            .job-company {
+                font-size: 14px;
+                font-weight: 600;
+                color: #2563eb;
+                margin: 4px 0 6px;
+            }
+
+            .job-desc {
+                font-size: 14px;
+                color: #374151;
+            }
+
+            .job-desc ul {
+                margin: 6px 0 0 16px;
+                padding: 0;
+            }
+
+            .job-desc li {
+                margin-bottom: 4px;
+            }
+
+            /* ===== GRID ===== */
+            .grid {
+                display: table;
+                width: 100%;
+            }
+
+            .col {
+                display: table-cell;
+                width: 50%;
+                vertical-align: top;
+            }
+
+            .col + .col {
+                padding-left: 32px;
+            }
+
+            /* ===== SKILLS ===== */
+            .skills {
+                font-size: 13px;
+            }
+
+            .skill {
+                display: inline-block;
+                background: #f1f5f9;
+                padding: 6px 10px;
+                border-radius: 6px;
+                margin: 4px 4px 0 0;
+                font-weight: 600;
+            }
+
+            .contact a {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .contact a:hover {
+                text-decoration: underline;
+            }
+
+            /* ===== PRINT ===== */
+            @media print {
+                body {
+                    background: none;
+                }
+                .page {
+                    margin: 0;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="page">
+            <!-- HEADER -->
+            <header class="header">
+                <div class="name">{{ personal.nombre }}</div>
+                <div class="role">{{ personal.titulo }}</div>
+                <div class="contact">
+                    <span>
+                        <a href="mailto:{{ personal.correo }}"
+                            >{{ personal.correo }}</a
+                        >
+                    </span>
+
+                    {% if personal.telefono %}
+                    <span>{{ personal.telefono }}</span>
+                    {% endif %} {% if personal.ubicacion %}
+                    <span>{{ personal.ubicacion }}</span>
+                    {% endif %} {% if personal.github %}
+                    <span>
+                        <a href="{{ personal.github }}">GitHub</a>
+                    </span>
+                    {% endif %} {% if personal.linkedin %}
+                    <span>
+                        <a href="{{ personal.linkedin }}">LinkedIn</a>
+                    </span>
+                    {% endif %}
+                </div>
+            </header>
+
+            {% if sobre_mi %}
+            <section class="section">
+                <div class="section-title">Perfil</div>
+                <p class="profile">{{ sobre_mi }}</p>
+            </section>
+            {% endif %} {% if experiencia %}
+            <section class="section">
+                <div class="section-title">Experiencia</div>
+                <div class="timeline">
+                    {% for exp in experiencia %}
+                    <div class="job">
+                        <div class="job-header">
+                            <div class="job-title">{{ exp.puesto }}</div>
+                            <div class="job-date">
+                                {{ exp.inicio }} – {{ exp.fin }}
+                            </div>
+                        </div>
+                        <div class="job-company">{{ exp.empresa }}</div>
+                        <div class="job-desc">
+                            {% if exp.descripcion %}{{ exp.descripcion }}{%
+                            endif %} {% if exp.logros %}
+                            <ul>
+                                {% for logro in exp.logros %}
+                                <li>{{ logro }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <section class="section">
+                <div class="grid">
+                    {% if educacion %}
+                    <div class="col">
+                        <div class="section-title">Educación</div>
+                        {% for edu in educacion %}
+                        <p>
+                            <strong>{{ edu.grado }}</strong><br />
+                            {{ edu.institucion }}<br />
+                            <span style="font-size: 12px; color: #6b7280">
+                                {{ edu.inicio }} – {{ edu.fin }}
+                            </span>
+                        </p>
+                        {% endfor %}
+                    </div>
+                    {% endif %} {% if habilidades %}
+                    <div class="col">
+                        <div class="section-title">Habilidades</div>
+                        <div class="skills">
+                            {% for skill in habilidades %} {% for clave, valor
+                            in skill %}
+                            <span class="skill">{{ clave }}</span>
+                            {% endfor %} {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

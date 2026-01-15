@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Giovanni Martinez - CV</title>
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                background: #e5e7eb;
+                font-family:
+                    Inter,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    Arial,
+                    sans-serif;
+                color: #111827;
+            }
+
+            /* ===== PAGE ===== */
+            .page {
+                width: 900px;
+                height: 1120px;
+                margin: 30px auto;
+                background: #ffffff;
+                padding: 48px 56px;
+            }
+
+            /* ===== HEADER ===== */
+            .header {
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 24px;
+                margin-bottom: 32px;
+            }
+
+            .name {
+                font-size: 32px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            }
+
+            .role {
+                font-size: 16px;
+                font-weight: 600;
+                color: #2563eb;
+                margin-top: 4px;
+            }
+
+            .contact {
+                margin-top: 14px;
+                font-size: 13px;
+                color: #4b5563;
+            }
+
+            .contact span {
+                margin-right: 14px;
+            }
+
+            /* ===== SECTION ===== */
+            .section {
+                margin-bottom: 34px;
+            }
+
+            .section-title {
+                font-size: 15px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #111827;
+                margin-bottom: 16px;
+            }
+
+            /* ===== PROFILE ===== */
+            .profile {
+                font-size: 15px;
+                line-height: 1.6;
+                color: #374151;
+            }
+
+            /* ===== EXPERIENCE ===== */
+            .timeline {
+                border-left: 2px solid #e5e7eb;
+                padding-left: 24px;
+            }
+
+            .job {
+                position: relative;
+                margin-bottom: 26px;
+            }
+
+            .job::before {
+                content: "";
+                position: absolute;
+                left: -31px;
+                top: 4px;
+                width: 10px;
+                height: 10px;
+                background: #2563eb;
+                border-radius: 50%;
+            }
+
+            .job-header {
+                display: table;
+                width: 100%;
+            }
+
+            .job-title {
+                display: table-cell;
+                font-weight: 700;
+                font-size: 16px;
+            }
+
+            .job-date {
+                display: table-cell;
+                text-align: right;
+                font-size: 12px;
+                color: #6b7280;
+                font-weight: 600;
+            }
+
+            .job-company {
+                font-size: 14px;
+                font-weight: 600;
+                color: #2563eb;
+                margin: 4px 0 6px;
+            }
+
+            .job-desc {
+                font-size: 14px;
+                color: #374151;
+            }
+
+            .job-desc ul {
+                margin: 6px 0 0 16px;
+                padding: 0;
+            }
+
+            .job-desc li {
+                margin-bottom: 4px;
+            }
+
+            /* ===== GRID ===== */
+            .grid {
+                display: table;
+                width: 100%;
+            }
+
+            .col {
+                display: table-cell;
+                width: 50%;
+                vertical-align: top;
+            }
+
+            .col + .col {
+                padding-left: 32px;
+            }
+
+            /* ===== SKILLS ===== */
+            .skills {
+                font-size: 13px;
+            }
+
+            .skill {
+                display: inline-block;
+                background: #f1f5f9;
+                padding: 6px 10px;
+                border-radius: 6px;
+                margin: 4px 4px 0 0;
+                font-weight: 600;
+            }
+
+            .contact a {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .contact a:hover {
+                text-decoration: underline;
+            }
+
+            /* ===== PRINT ===== */
+            @media print {
+                body {
+                    background: none;
+                }
+                .page {
+                    margin: 0;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="page">
+            <!-- HEADER -->
+            <header class="header">
+                <div class="name">Giovanni Martinez</div>
+                <div class="role">Desarrollador Web</div>
+                <div class="contact">
+                    <span>
+                        <a href="mailto:giovannimartinezz122@gmail.com"
+                            >giovannimartinezz122@gmail.com</a
+                        >
+                    </span>
+
+                    
+                    <span>+595 972 472824</span>
+                     
+                    <span>Asuncion, Paraguay</span>
+                     
+                    <span>
+                        <a href="https://github.com/Kakarot-Caracter">GitHub</a>
+                    </span>
+                     
+                    <span>
+                        <a href="https://linkedin.com/in/giovanni-martinez7017">LinkedIn</a>
+                    </span>
+                    
+                </div>
+            </header>
+
+            
+            <section class="section">
+                <div class="section-title">Perfil</div>
+                <p class="profile">Apasionado desarrollador de software especializado en crear aplicaciones web modernas con Next.js, NestJS y tecnologías del ecosistema JavaScript. Desde muy joven, he trabajado en proyectos personales y profesionales que me han permitido fortalecer habilidades tanto en frontend como en backend, siempre explorando nuevas herramientas y soluciones innovadoras.
+</p>
+            </section>
+             
+            <section class="section">
+                <div class="section-title">Experiencia</div>
+                <div class="timeline">
+                    
+                    <div class="job">
+                        <div class="job-header">
+                            <div class="job-title">Desarrollador Web</div>
+                            <div class="job-date">
+                                Ene 2025 – Mar 2025
+                            </div>
+                        </div>
+                        <div class="job-company">Taskflow</div>
+                        <div class="job-desc">
+                            Aplicación de gestión de tareas con CRUD completo, filtrado por estado y autenticación de usuarios.
+ 
+                            <ul>
+                                
+                                <li>Gestioné el estado de la aplicación con Zustand y optimicé consultas usando React Query, logrando una experiencia de usuario fluida y eficiente</li>
+                                
+                                <li>Implementé una API segura y escalable con NestJS y Prisma, garantizando integridad de datos y validación de entradas</li>
+                                
+                            </ul>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="job">
+                        <div class="job-header">
+                            <div class="job-title">Desarrollador Web</div>
+                            <div class="job-date">
+                                Abr 2025 – Jun 2025
+                            </div>
+                        </div>
+                        <div class="job-company">Workouthub</div>
+                        <div class="job-desc">
+                            Desarrollo completo de frontend y backend para plataforma de gestión de rutinas de ejercicio y usuarios.
+ 
+                            <ul>
+                                
+                                <li>Implementé interfaces responsivas y accesibles, mejorando la experiencia del usuario en múltiples dispositivos y navegadores</li>
+                                
+                                <li>Optimizé manejo de estado y consultas mediante React Query y Zustand, asegurando interacciones rápidas y consistentes</li>
+                                
+                            </ul>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="job">
+                        <div class="job-header">
+                            <div class="job-title">Desarrollador Web</div>
+                            <div class="job-date">
+                                Jul 2025 – Oct 2025
+                            </div>
+                        </div>
+                        <div class="job-company">Econova</div>
+                        <div class="job-desc">
+                            E-commerce completo con catálogo de productos, carrito de compras, historial de pedidos y panel de administración.
+ 
+                            <ul>
+                                
+                                <li>Integré funcionalidades frontend y backend con sistemas externos y APIs RESTful, asegurando escalabilidad y eficiencia</li>
+                                
+                                <li>Implementé autenticación y autorización seguras usando JWT y manejo de roles, garantizando control de accesos y seguridad de datos</li>
+                                
+                                <li>Apliqué buenas prácticas y patrones de diseño modernos para optimizar la arquitectura de la API y mantener rendimiento y mantenimiento a largo plazo</li>
+                                
+                            </ul>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+            
+
+            <section class="section">
+                <div class="grid">
+                    
+                    <div class="col">
+                        <div class="section-title">Educación</div>
+                        
+                        <p>
+                            <strong>Bachillerato en informática</strong><br />
+                            Colegio Tecnico Cerro Cora<br />
+                            <span style="font-size: 12px; color: #6b7280">
+                                Feb 2022 – Nov 2024
+                            </span>
+                        </p>
+                        
+                        <p>
+                            <strong>Desarrollo de Software</strong><br />
+                            Aprendizaje Autodidacta<br />
+                            <span style="font-size: 12px; color: #6b7280">
+                                Ene 2020 – presente
+                            </span>
+                        </p>
+                        
+                    </div>
+                     
+                    <div class="col">
+                        <div class="section-title">Habilidades</div>
+                        <div class="skills">
+                             
+                            <span class="skill">Lenguajes de Programación</span>
+                              
+                            <span class="skill">Frontend</span>
+                              
+                            <span class="skill">Backend</span>
+                              
+                            <span class="skill">Bases de Datos</span>
+                              
+                            <span class="skill">Infraestructura</span>
+                              
+                            <span class="skill">Buenas Prácticas</span>
+                              
+                            <span class="skill">Actualmente Aprendiendo</span>
+                             
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

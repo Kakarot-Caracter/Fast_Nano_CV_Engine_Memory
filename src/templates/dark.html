@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ personal.nombre }} - CV</title>
+        <style>
+            :root {
+                --bg-dark: #1a1a1a;
+                --sidebar-dark: #121212;
+                --accent: #64ffda; /* Color cian suave estilo dark mode */
+                --text-main: #e0e0e0;
+                --text-muted: #a0a0a0;
+                --white: #ffffff;
+            }
+
+            * {
+                box-sizing: border-box;
+                -webkit-print-color-adjust: exact;
+            }
+
+            body {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: var(--bg-dark);
+                color: var(--text-main);
+                line-height: 1.4;
+            }
+
+            /* Contenedor principal para PDF */
+            .cv-page {
+                width: 100%;
+                max-width: 850px; /* Ancho estándar A4 aprox */
+                margin: 0 auto;
+                background: var(--bg-dark);
+                display: flex;
+                min-height: 100vh;
+            }
+
+            /* Sidebar */
+            .sidebar {
+                width: 32%;
+                background-color: var(--sidebar-dark);
+                color: var(--white);
+                padding: 40px 25px;
+            }
+
+            /* Contenido Principal */
+            .main-content {
+                width: 68%;
+                padding: 40px;
+                background-color: var(--bg-dark);
+            }
+
+            /* Tipografía */
+            h1 {
+                font-size: 26px;
+                margin: 0 0 5px 0;
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .profesion {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text-muted);
+                display: block;
+                margin-bottom: 30px;
+            }
+
+            h2 {
+                font-size: 16px;
+                text-transform: uppercase;
+                border-bottom: 1px solid #333;
+                padding-bottom: 8px;
+                margin-bottom: 15px;
+                color: var(--accent);
+                letter-spacing: 1px;
+            }
+
+            /* Evitar cortes de secciones en PDF */
+            .section-block {
+                margin-bottom: 25px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            /* Listas y Contacto */
+            .list-unstyled {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .contact-item {
+                font-size: 12px;
+                margin-bottom: 12px;
+                color: var(--text-main);
+                display: flex;
+                flex-direction: column;
+            }
+
+            .contact-item span {
+                color: var(--text-muted);
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            .contact-item a {
+                color: var(--white);
+                text-decoration: none;
+            }
+
+            .skill-badge {
+                display: inline-block;
+                background: #252525;
+                color: var(--text-main);
+                padding: 4px 10px;
+                border-radius: 3px;
+                font-size: 11px;
+                margin: 0 4px 6px 0;
+                border: 1px solid #333;
+            }
+
+            /* Experiencia y Educación */
+            .item {
+                margin-bottom: 20px;
+            }
+
+            .item-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 4px;
+            }
+
+            .item-title {
+                font-weight: 700;
+                font-size: 15px;
+                color: var(--white);
+            }
+
+            .item-date {
+                font-size: 11px;
+                color: var(--accent);
+                font-weight: 600;
+                white-space: nowrap;
+                margin-left: 10px;
+            }
+
+            .item-sub {
+                font-size: 13px;
+                color: var(--text-muted);
+                font-style: italic;
+                margin-bottom: 8px;
+            }
+
+            .item-desc {
+                font-size: 13px;
+                color: var(--text-main);
+                margin: 8px 0;
+            }
+
+            .logros {
+                margin: 8px 0;
+                padding-left: 15px;
+                font-size: 12.5px;
+                color: var(--text-main);
+            }
+
+            .logros li {
+                margin-bottom: 4px;
+            }
+
+            /* Ajustes para Impresión PDF */
+            @media print {
+                body {
+                    background: var(--bg-dark);
+                }
+                .cv-page {
+                    margin: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+                @page {
+                    margin: 0;
+                    size: auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="cv-page">
+            <aside class="sidebar">
+                <h1>{{ personal.nombre }}</h1>
+                <span class="profesion">{{ personal.titulo }}</span>
+
+                <div class="section-block">
+                    <h2>Contacto</h2>
+                    <div class="list-unstyled">
+                        {% if personal.telefono %}
+                        <div class="contact-item">
+                            <span>Teléfono</span>
+                            {{ personal.telefono }}
+                        </div>
+                        {% endif %}
+
+                        <div class="contact-item">
+                            <span>Email</span>
+                            <a href="mailto:{{ personal.correo }}"
+                                >{{ personal.correo }}</a
+                            >
+                        </div>
+
+                        {% if personal.ubicacion %}
+                        <div class="contact-item">
+                            <span>Ubicación</span>
+                            {{ personal.ubicacion }}
+                        </div>
+                        {% endif %} {% if personal.linkedin %}
+                        <div class="contact-item">
+                            <span>LinkedIn</span>
+                            <a href="{{ personal.linkedin }}"
+                                >Perfil Profesional</a
+                            >
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if habilidades %}
+                <div class="section-block">
+                    <h2>Habilidades</h2>
+                    {% for skill in habilidades %} {% for clave, valor in skill
+                    %}
+                    <div style="margin-bottom: 10px">
+                        <div
+                            style="
+                                font-size: 11px;
+                                color: var(--accent);
+                                margin-bottom: 5px;
+                                font-weight: bold;
+                            "
+                        >
+                            {{ clave }}
+                        </div>
+                        <div class="skill-container">{{ valor }}</div>
+                    </div>
+                    {% endfor %} {% endfor %}
+                </div>
+                {% endif %} {% for clave, valor in extra %}
+                <div class="section-block">
+                    <h2>{{ clave | capitalize }}</h2>
+                    <div
+                        class="list-unstyled"
+                        style="font-size: 12px; color: var(--text-main)"
+                    >
+                        {% if valor is iterable and valor is not string %} {%
+                        for item in valor %}
+                        <div style="margin-bottom: 5px">• {{ item }}</div>
+                        {% endfor %} {% else %}
+                        <div>{{ valor }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </aside>
+
+            <main class="main-content">
+                {% if sobre_mi %}
+                <section class="section-block">
+                    <h2>Perfil</h2>
+                    <p class="item-desc">{{ sobre_mi }}</p>
+                </section>
+                {% endif %} {% if experiencia %}
+                <section class="section-block">
+                    <h2>Experiencia</h2>
+                    {% for exp in experiencia %}
+                    <div class="item">
+                        <div class="item-header">
+                            <span class="item-title">{{ exp.puesto }}</span>
+                            <span class="item-date"
+                                >{{ exp.inicio }} – {{ exp.fin }}</span
+                            >
+                        </div>
+                        <div class="item-sub">{{ exp.empresa }}</div>
+
+                        {% if exp.descripcion %}
+                        <p class="item-desc">{{ exp.descripcion }}</p>
+                        {% endif %} {% if exp.logros %}
+                        <ul class="logros">
+                            {% for logro in exp.logros %}
+                            <li>{{ logro }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </section>
+                {% endif %} {% if educacion %}
+                <section class="section-block">
+                    <h2>Educación</h2>
+                    {% for edu in educacion %}
+                    <div class="item">
+                        <div class="item-header">
+                            <span class="item-title">{{ edu.grado }}</span>
+                            <span class="item-date"
+                                >{{ edu.inicio }} – {{ edu.fin }}</span
+                            >
+                        </div>
+                        <div class="item-sub">{{ edu.institucion }}</div>
+                        {% if edu.logros %}
+                        <ul class="logros">
+                            {% for logro in edu.logros %}
+                            <li>{{ logro }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </section>
+                {% endif %}
+            </main>
+        </div>
+    </body>
+</html>

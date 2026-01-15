@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ personal.nombre }} - Currículum Vitae</title>
+        <style>
+            :root {
+                --primary: #2c3e50;
+                --accent: #3498db;
+                --text: #444;
+                --light-text: #7f8c8d;
+                --bg: #ffffff;
+                --section-bg: #f8f9fa;
+            }
+
+            body {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #eee;
+                color: var(--text);
+                line-height: 1.5;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 40px auto;
+                background: var(--bg);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                display: grid;
+                grid-template-columns: 35% 65%;
+                min-height: 1100px;
+            }
+
+            .sidebar {
+                background-color: var(--primary);
+                color: white;
+                padding: 40px 30px;
+            }
+
+            .sidebar h1 {
+                font-size: 24px;
+                margin: 0;
+                line-height: 1.2;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .sidebar .titulo {
+                font-size: 14px;
+                color: var(--accent);
+                font-weight: 600;
+                margin-bottom: 30px;
+                display: block;
+            }
+
+            .sidebar-section {
+                margin-bottom: 35px;
+            }
+
+            .sidebar h2 {
+                font-size: 16px;
+                text-transform: uppercase;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                padding-bottom: 5px;
+                margin-bottom: 15px;
+                color: #fff;
+            }
+
+            .contact-info {
+                list-style: none;
+                padding: 0;
+                font-size: 13px;
+            }
+
+            .contact-info li {
+                margin-bottom: 10px;
+                word-break: break-all;
+            }
+
+            .contact-info a {
+                color: #ecf0f1;
+                text-decoration: none;
+            }
+
+            .skills-list {
+                list-style: none;
+                padding: 0;
+                font-size: 13px;
+            }
+
+            .skills-list li {
+                margin-bottom: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 5px 10px;
+                border-radius: 4px;
+            }
+
+            .main-content {
+                padding: 40px;
+            }
+
+            .main-section {
+                margin-bottom: 30px;
+            }
+
+            .main-section h2 {
+                font-size: 18px;
+                color: var(--primary);
+                border-left: 4px solid var(--accent);
+                padding-left: 10px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+            }
+
+            .item {
+                margin-bottom: 20px;
+            }
+
+            .item-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            .item-title {
+                font-weight: bold;
+                font-size: 16px;
+                color: #333;
+            }
+
+            .item-date {
+                font-size: 12px;
+                color: var(--light-text);
+                font-weight: 600;
+            }
+
+            .item-sub {
+                font-size: 14px;
+                color: var(--accent);
+                margin-bottom: 5px;
+            }
+
+            .item-desc {
+                font-size: 14px;
+                margin-top: 5px;
+                color: var(--text);
+            }
+
+            ul.logros {
+                margin: 8px 0;
+                padding-left: 18px;
+                font-size: 13.5px;
+            }
+
+            ul.logros li {
+                margin-bottom: 4px;
+            }
+
+            /* Estilos para impresión */
+            @media print {
+                body {
+                    background: none;
+                }
+                .container {
+                    margin: 0;
+                    box-shadow: none;
+                    width: 100%;
+                }
+                .sidebar {
+                    -webkit-print-color-adjust: exact;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <aside class="sidebar">
+                <h1>{{ personal.nombre }}</h1>
+                <span class="titulo">{{ personal.titulo }}</span>
+
+                <div class="sidebar-section">
+                    <h2>Contacto</h2>
+                    <ul class="contact-info">
+                        {% if personal.telefono %}
+                        <li>{{ personal.telefono }}</li>
+                        {% endif %}
+                        <li>
+                            <a href="mailto:{{ personal.correo }}"
+                                >{{ personal.correo }}</a
+                            >
+                        </li>
+                        {% if personal.ubicacion %}
+                        <li>{{ personal.ubicacion }}</li>
+                        {% endif %} {% if personal.web %}
+                        <li><a href="{{ personal.web }}">Web Personal</a></li>
+                        {% endif %} {% if personal.linkedin %}
+                        <li><a href="{{ personal.linkedin }}">LinkedIn</a></li>
+                        {% endif %} {% if personal.github %}
+                        <li><a href="{{ personal.github }}">GitHub</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {% if habilidades %}
+                <div class="sidebar-section">
+                    <h2>Habilidades</h2>
+                    <ul class="skills-list">
+                        {% for skill in habilidades %} {% for clave, valor in
+                        skill %}
+                        <li><strong>{{ clave }}:</strong> {{ valor }}</li>
+                        {% endfor %} {% endfor %}
+                    </ul>
+                </div>
+                {% endif %} {% for clave, valor in extra %}
+                <div class="sidebar-section">
+                    <h2>{{ clave | capitalize }}</h2>
+                    <ul class="contact-info">
+                        {% if valor is iterable and valor is not string %} {%
+                        for item in valor %}
+                        <li>{{ item }}</li>
+                        {% endfor %} {% else %}
+                        <li>{{ valor }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </aside>
+
+            <main class="main-content">
+                {% if sobre_mi %}
+                <section class="main-section">
+                    <h2>Perfil Profesional</h2>
+                    <p style="font-size: 14px; color: var(--text)">
+                        {{ sobre_mi }}
+                    </p>
+                </section>
+                {% endif %} {% if experiencia %}
+                <section class="main-section">
+                    <h2>Experiencia Laboral</h2>
+                    {% for exp in experiencia %}
+                    <div class="item">
+                        <div class="item-header">
+                            <span class="item-title">{{ exp.puesto }}</span>
+                            <span class="item-date"
+                                >{{ exp.inicio }} – {{ exp.fin }}</span
+                            >
+                        </div>
+                        <div class="item-sub">{{ exp.empresa }}</div>
+                        {% if exp.descripcion %}
+                        <p class="item-desc">{{ exp.descripcion }}</p>
+                        {% endif %} {% if exp.logros %}
+                        <ul class="logros">
+                            {% for logro in exp.logros %}
+                            <li>{{ logro }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </section>
+                {% endif %} {% if educacion %}
+                <section class="main-section">
+                    <h2>Formación Académica</h2>
+                    {% for edu in educacion %}
+                    <div class="item">
+                        <div class="item-header">
+                            <span class="item-title">{{ edu.grado }}</span>
+                            <span class="item-date"
+                                >{{ edu.inicio }} – {{ edu.fin }}</span
+                            >
+                        </div>
+                        <div class="item-sub">
+                            {{ edu.institucion }}{% if edu.ubicacion %} | {{
+                            edu.ubicacion }}{% endif %}
+                        </div>
+                        {% if edu.logros %}
+                        <ul class="logros">
+                            {% for logro in edu.logros %}
+                            <li>{{ logro }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </section>
+                {% endif %}
+            </main>
+        </div>
+    </body>
+</html>
