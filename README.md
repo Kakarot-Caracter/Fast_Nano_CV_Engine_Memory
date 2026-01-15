@@ -1,8 +1,9 @@
-# Fast Nano CV Engine
+# Fast Nano CV Engine (Variante In-Memory)
 
-![Versión](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Versión](https://img.shields.io/badge/version-0.1.1-blue.svg)
 ![Licencia](https://img.shields.io/badge/license-MIT-green.svg)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![Rust](https://img.shields.io/badge/rust-1.78.0-orange.svg)
 
 ```
     _   __ ___     _   __ ____     ______ _    __
@@ -12,38 +13,46 @@
 /_/ |_//_/  |_|/_/ |_/ \____/   \____/   |___/
 ```
 
-Un generador de CVs ultrarrápido, simple y elegante a partir de un archivo YAML. Crea un currículum profesional en formato HTML y PDF utilizando plantillas configurables.
+Un motor de renderizado de CV ultrarrápido escrito en Rust, optimizado como un componente de backend sin estado. Esta variante "in-memory" está diseñada para ser invocada por un orquestador (p. ej., un servicio Nest.js), recibiendo datos por `stdin` y devolviendo un PDF por `stdout`, garantizando máxima velocidad y eficiencia sin acceso a disco.
+
+## 🏛️ Arquitectura y Contexto de Uso
+
+Este proyecto no es una aplicación de usuario final, sino un **componente de backend especializado**. Está diseñado para el siguiente flujo de trabajo:
+
+1.  **Frontend (Next.js):** Un usuario solicita la generación de su CV a través de una interfaz web.
+2.  **Orquestador (Nest.js):** El backend recibe la solicitud. Lee los datos del CV del usuario (desde una base de datos o un archivo `.yml`) y los carga en memoria.
+3.  **Ejecución del Motor (Este proyecto):** El orquestador invoca el binario compilado de `fast_nano_cv_engine_memory` como un proceso hijo.
+    -   Le pasa los datos del CV a través de la **tubería `stdin`**.
+    -   Captura el resultado binario (los bytes del archivo PDF) directamente desde la **tubería `stdout`**.
+4.  **Respuesta al Cliente:** El orquestador envía el PDF capturado de vuelta al frontend para su descarga o visualización.
+
+Este enfoque evita por completo las operaciones de entrada/salida de disco durante la generación, lo que lo hace ideal para entornos de servidor de alto rendimiento.
 
 ## ✨ Características Principales
 
-*   **Entrada de Datos Simple:** Define todo tu currículum en un archivo `YAML` limpio y fácil de editar.
-*   **Generación Multi-formato:** Produce una versión web **HTML** y un archivo **PDF** profesional listos para imprimir o enviar.
+*   **Procesamiento In-Memory:** Recibe datos YAML por `stdin` y emite un PDF por `stdout`, sin tocar el sistema de archivos.
+*   **Sin Estado y Portátil:** El binario es autocontenido, con las plantillas HTML incrustadas, lo que facilita su despliegue.
+*   **Rendimiento Nativo:** Construido en Rust para una generación casi instantánea.
 *   **Motor de Plantillas:** Personaliza la apariencia de tu CV usando el motor de plantillas [Tera](https://keats.github.io/tera/).
 *   **Plantillas Incluidas:** Viene con tres temas listos para usar: `base`, `dark` y `modern`.
-*   **Rendimiento Nativo:** Construido en Rust para una generación casi instantánea.
-*   **Interfaz de Línea de Comandos (CLI):** Integración perfecta en cualquier flujo de trabajo de terminal.
 
 ## ⚙️ Cómo Funciona
 
-El motor sigue un proceso simple y eficiente para generar los documentos:
+El motor sigue un proceso simple y eficiente optimizado para la integración con otros servicios:
 
-`Archivo YAML de Entrada` → `Motor Rust` → `Renderizado con Plantilla Tera` → `Archivos HTML y PDF de Salida`
+`Datos YAML (vía stdin)` → `Motor Rust` → `Renderizado con Plantilla Incrustada` → `Bytes del PDF (vía stdout)`
 
 ## 📋 Prerrequisitos
 
-Antes de empezar, asegúrate de tener lo siguiente instalado en tu sistema:
-
-1.  **Rust y Cargo:** El entorno de desarrollo de Rust. Puedes instalarlo desde [rustup.rs](https://rustup.rs/).
-2.  **Google Chrome / Chromium:** La generación de PDF depende de `headless_chrome`, por lo que es necesario tener el navegador instalado.
+1.  **Rust y Cargo:** Para compilar el proyecto. Puedes instalarlo desde [rustup.rs](https://rustup.rs/).
+2.  **Google Chrome / Chromium:** La generación de PDF depende de `headless_chrome`, por lo que es necesario tener el navegador instalado en el entorno donde se ejecute el binario.
 
 ## 🚀 Instalación y Compilación
 
-Sigue estos pasos para compilar el proyecto y tener el ejecutable listo.
-
 1.  **Clona el Repositorio:**
     ```bash
-    git clone https://github.com/Kakarot-Caracter/fast_nano_cv_engine.git
-    cd fast_nano_cv_engine
+    git clone https://github.com/Kakarot-Caracter/fast_nano_cv_engine_memory.git
+    cd fast_nano_cv_engine_memory
     ```
 
 2.  **Construye para Producción:**
@@ -52,117 +61,95 @@ Sigue estos pasos para compilar el proyecto y tener el ejecutable listo.
     cargo build --release
     ```
 
-El binario ejecutable final se ubicará en `target/release/fast_nano_cv_engine`.
+El binario ejecutable final se ubicará en `target/release/fast_nano_cv_engine_memory`.
 
 ## USAGE
 
-Una vez compilado, puedes usar el motor directamente desde tu terminal.
+El binario está diseñado para ser usado con tuberías (`pipes`). Se le debe pasar el contenido del archivo YAML a través de `stdin` y el PDF resultante será emitido a `stdout`.
 
 ### Sintaxis del Comando
 
-```
-./target/release/fast_nano_cv_engine <archivo_yaml> [--template <nombre_plantilla>]
+```bash
+cat <archivo_yaml> | ./target/release/fast_nano_cv_engine_memory [--template <nombre>] > <archivo_salida.pdf>
 ```
 
 | Argumento              | Descripción                                                                                                |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `<archivo_yaml>`       | **(Requerido)** La ruta a tu archivo `.yml` que contiene los datos del currículum.                              |
-| `--template <nombre>` | **(Opcional)** El nombre de la plantilla a usar. Si no se especifica, se usará `base` por defecto. |
+| `stdin`                | **(Requerido)** Contenido del archivo YAML que se pasa al proceso.                                          |
+| `--template <nombre>` | **(Opcional)** El nombre de la plantilla a usar (`base`, `dark`, `modern`). Por defecto, es `base`.     |
+| `stdout`               | **(Requerido)** El flujo de salida donde se recibirán los bytes del PDF.                                   |
+
 
 ### Ejemplos de Uso
 
 1.  **Generar CV con la plantilla por defecto (`base`):**
     ```bash
-    ./target/release/fast_nano_cv_engine "cv.yml"
+    cat cv.yml | ./target/release/fast_nano_cv_engine_memory > output/giovanni_martinez_cv.pdf
     ```
 
 2.  **Generar CV usando la plantilla `modern`:**
     ```bash
-    ./target/release/fast_nano_cv_engine "cv.yml" --template modern
+    cat cv.yml | ./target/release/fast_nano_cv_engine_memory --template modern > output/cv_modern.pdf
     ```
 
-3.  **Generar CV usando la plantilla `dark`:**
-    ```bash
-    ./target/release/fast_nano_cv_engine "cv.yml" --template dark
+3.  **Integración en un script de Node.js (ejemplo para el orquestador):**
+    ```javascript
+    const { spawn } = require('child_process');
+    const fs = require('fs');
+    const path = require('path');
+
+    async function generatePdf(yamlData, template = 'base') {
+      const binaryPath = path.resolve('./target/release/fast_nano_cv_engine_memory');
+      const args = ['--template', template];
+      
+      return new Promise((resolve, reject) => {
+        const process = spawn(binaryPath, args);
+        const pdfChunks = [];
+        
+        process.stdout.on('data', (chunk) => {
+          pdfChunks.push(chunk);
+        });
+
+        process.stderr.on('data', (data) => {
+          // Ideal para logging
+          console.error(`[stderr]: ${data}`);
+        });
+
+        process.on('close', (code) => {
+          if (code === 0) {
+            resolve(Buffer.concat(pdfChunks));
+          } else {
+            reject(new Error(`El proceso terminó con código ${code}`));
+          }
+        });
+
+        // Escribir los datos YAML en stdin y cerrar la tubería
+        process.stdin.write(yamlData);
+        process.stdin.end();
+      });
+    }
+
+    // Uso
+    const yamlContent = fs.readFileSync('cv.yml', 'utf-8');
+    generatePdf(yamlContent, 'modern').then(pdfBuffer => {
+      fs.writeFileSync('cv_from_node.pdf', pdfBuffer);
+      console.log('PDF generado desde Node.js!');
+    });
     ```
-
-Los archivos resultantes (`.html` y `_CV.pdf`) se guardarán automáticamente en la carpeta `output/`.
-
-### Uso en Desarrollo
-
-Durante el desarrollo, puedes usar `cargo run` para compilar y ejecutar el programa en un solo paso:
-
-```bash
-cargo run -- "cv.yml" --template modern
-```
 
 ## 📄 Formato del Archivo YAML
 
-Para que el motor funcione, tu archivo `cv.yml` debe seguir una estructura específica. A continuación se detalla cada sección, basada en los modelos de datos del programa.
+El formato del archivo `cv.yml` no ha cambiado. Sigue utilizando la misma estructura para definir las secciones `personal`, `sobre_mi`, `educacion`, `experiencia` y `habilidades`.
 
-```yaml
-personal:
-  nombre: Giovanni Martinez
-  titulo: Desarrollador Web
-  telefono: "+595 972 472824"
-  correo: giovannimartinezz122@gmail.com
-  ubicacion: Asuncion, Paraguay
-  web: "https://mi-portafolio-gamma-two.vercel.app/"
-  linkedin: "https://linkedin.com/in/giovanni-martinez7017"
-  github: "https://github.com/Kakarot-Caracter"
-
-sobre_mi: >
-  Apasionado desarrollador de software especializado en crear aplicaciones web modernas con Next.js, NestJS y tecnologías del ecosistema JavaScript. Desde muy joven, he trabajado en proyectos personales y profesionales que me han permitido fortalecer habilidades tanto en frontend como en backend, siempre explorando nuevas herramientas y soluciones innovadoras.
-
-educacion:
-  - institucion: Colegio Tecnico Cerro Cora
-    grado: Bachillerato en informática
-    ubicacion: Asuncion, Paraguay
-    inicio: Feb 2022
-    fin: Nov 2024
-    logros:
-      - Desarrollo de habilidades básicas en programación y resolución de problemas computacionales
-      - Comprensión de conceptos fundamentales de informática, algoritmos y estructuras de datos
-
-experiencia:
-  - empresa: Taskflow
-    puesto: Desarrollador Web
-    inicio: Ene 2025
-    fin: Mar 2025
-    descripcion: >
-      Aplicación de gestión de tareas con CRUD completo, filtrado por estado y autenticación de usuarios.
-    logros:
-      - Gestioné el estado de la aplicación con Zustand y optimicé consultas usando React Query.
-      - Implementé una API segura y escalable con NestJS y Prisma.
-
-habilidades:
-  - Lenguajes de Programación: JavaScript, TypeScript, Python, Rust
-  - Frontend: React, Next.js, TailwindCSS
-  - Backend: NestJS, Node.js, REST API
-  - Bases de Datos: PostgreSQL, MySQL, MongoDB, Prisma
-  - Infraestructura: Linux, Docker, Git
-```
-
-### Descripción de las Secciones:
-
-*   `personal`: (Objeto) Tu información de contacto básica. Todos los campos son strings, y la mayoría son opcionales excepto `nombre`, `titulo` y `correo`.
-*   `sobre_mi`: (String) Un párrafo de resumen profesional.
-*   `educacion`: (Lista de Objetos) Tu historial académico. Cada objeto debe contener `institucion`, `grado`, `inicio`, `fin` y una lista de `logros`.
-*   `experiencia`: (Lista de Objetos) Tu historial laboral. Cada objeto debe contener `empresa`, `puesto`, `inicio`, `fin`, una `descripcion` opcional y una lista de `logros`.
-*   `habilidades`: (Lista de Mapas) Una lista donde cada ítem es un mapa que representa una categoría y sus habilidades.
+*(La sección detallada del formato YAML del README anterior sigue siendo válida y puede consultarse como referencia).*
 
 ## 🎨 Plantillas Personalizadas
 
-Crear tu propia plantilla es fácil:
+Para añadir o modificar plantillas:
 
-1.  Crea un nuevo archivo `.html` en la carpeta `src/templates/`.
-2.  Utiliza la sintaxis de [Tera](https://keats.github.io/tera/docs/#templates) para acceder a los datos del CV (puedes usar `base.html` como referencia).
+1.  Edita o añade un nuevo archivo `.html` en la carpeta `src/templates/`.
+2.  El sistema `RustEmbed` automáticamente incluirá los cambios en el binario la próxima vez que compiles con `cargo build`.
 3.  Ejecuta el programa apuntando a tu nueva plantilla con el flag `--template`.
-
-Por ejemplo, si creas `mi_plantilla.html`, la usarías así:
-```bash
-./target/release/fast_nano_cv_engine cv.yml --template mi_plantilla
-```
 
 ## 🤝 Contribuciones
 

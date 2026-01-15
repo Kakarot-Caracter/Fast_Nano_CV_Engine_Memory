@@ -1,13 +1,9 @@
 use crate::models::CV;
-use anyhow::{Context as AnyhowContext, Result};
-use std::path::Path;
+use anyhow::Result;
 use tera::{Context, Tera};
 
-pub fn render_html_from_str<P: AsRef<Path>>(
-    cv: &CV,
-    template_content: &str,
-    output: P,
-) -> Result<()> {
+/// Renderiza HTML desde un CV y un template, devuelve el HTML como String en memoria
+pub fn render_html_to_string(cv: &CV, template_content: &str) -> Result<String> {
     let mut tera = Tera::default();
 
     tera.add_raw_template("cv_template", template_content)
@@ -25,12 +21,5 @@ pub fn render_html_from_str<P: AsRef<Path>>(
         .render("cv_template", &context)
         .map_err(|e| anyhow::anyhow!("Error al renderizar con Tera: {}", e))?;
 
-    std::fs::write(output.as_ref(), rendered).with_context(|| {
-        format!(
-            "No se pudo escribir el archivo HTML en: {:?}",
-            output.as_ref()
-        )
-    })?;
-
-    Ok(())
+    Ok(rendered)
 }

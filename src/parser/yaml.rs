@@ -1,9 +1,10 @@
-use crate::errors::ParserError;
 use crate::models::CV;
-use std::fs;
+use anyhow::{Context, Result};
+use serde_yaml;
 
-pub fn parse(path: &str) -> Result<CV, ParserError> {
-    let content = fs::read_to_string(path)?;
-    let cv = serde_yaml::from_str(&content)?;
+/// Parsear YAML desde un &str (en memoria)
+pub fn parse_str(yaml_content: &str) -> Result<CV> {
+    let cv: CV =
+        serde_yaml::from_str(yaml_content).context("No se pudo parsear el YAML desde memoria")?;
     Ok(cv)
 }

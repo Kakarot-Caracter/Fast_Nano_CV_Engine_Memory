@@ -1,12 +1,9 @@
 use anyhow::{Context, Result};
 use headless_chrome::{Browser, LaunchOptions, types::PrintToPdfOptions};
-use std::fs;
-use std::path::Path;
 
-pub fn html_to_pdf<P: AsRef<Path>>(html_path: P, pdf_path: P) -> Result<()> {
-    let html_p = html_path.as_ref();
-    let pdf_p = pdf_path.as_ref();
-
+/// Convierte HTML en memoria a PDF en memoria (Vec<u8>)
+pub fn html_to_pdf_bytes(html_content: &str) -> Result<Vec<u8>> {
+    // Iniciar navegador headless
     let browser = Browser::new(
         LaunchOptions::default_builder()
             .headless(true)
@@ -17,19 +14,17 @@ pub fn html_to_pdf<P: AsRef<Path>>(html_path: P, pdf_path: P) -> Result<()> {
 
     let tab = browser.new_tab().context("No se pudo abrir la pestaña")?;
 
-    let absolute_path = html_p
-        .canonicalize()
-        .with_context(|| format!("No se pudo encontrar el archivo HTML en: {:?}", html_p))?;
+    // Cargar el HTML directamente usando data URI
+    let data_url = format!("data:text/html,{}", urlencoding::encode(html_content));
+    tab.navigate_to(&data_url)?.wait_until_navigated()?;
 
-    let url = format!("file://{}", absolute_path.display());
-
-    tab.navigate_to(&url)?.wait_until_navigated()?;
-
+    // Ajuste de márgenes
     tab.evaluate(
         "document.body.style.margin = '0'; document.documentElement.style.margin = '0';",
         false,
     )?;
 
+    // Calcular alto del contenido para el PDF
     let scroll_height = tab
         .evaluate("document.body.getBoundingClientRect().height", false)?
         .value
@@ -37,8 +32,8 @@ pub fn html_to_pdf<P: AsRef<Path>>(html_path: P, pdf_path: P) -> Result<()> {
         .as_f64()
         .unwrap_or(1000.0);
 
-    let height_inches = scroll_height / 96.0;
-    let width_inches = 8.27;
+    let height_inches = scroll_height / 96.0; // 96px por pulgada
+    let width_inches = 8.27; // A4
 
     let pdf_options = PrintToPdfOptions {
         print_background: Some(true),
@@ -52,12 +47,10 @@ pub fn html_to_pdf<P: AsRef<Path>>(html_path: P, pdf_path: P) -> Result<()> {
         ..Default::default()
     };
 
+    // Generar PDF en memoria
     let pdf_data = tab
         .print_to_pdf(Some(pdf_options))
         .map_err(|e| anyhow::anyhow!("Error al imprimir: {}", e))?;
 
-    fs::write(pdf_p, pdf_data)
-        .with_context(|| format!("Error al escribir el archivo PDF en: {:?}", pdf_p))?;
-
-    Ok(())
+    Ok(pdf_data)
 }
