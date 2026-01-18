@@ -1,160 +1,109 @@
-# Fast Nano CV Engine (Variante In-Memory)
+# Fast Nano CV Engine (Versión In-Memory para Node.js)
 
-![Versión](https://img.shields.io/badge/version-0.1.1-blue.svg)
-![Licencia](https://img.shields.io/badge/license-MIT-green.svg)
-![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
-![Rust](https://img.shields.io/badge/rust-1.78.0-orange.svg)
+Un motor de generación de CVs ultrarrápido, escrito en Rust y compilado como un **complemento nativo de Node.js**. Esta versión ha sido modificada del [Fast_Nano_CV_Engine original](https://github.com/Kakarot-Caracter/Fast_Nano_CV_Engine) para operar completamente en memoria, haciéndola ideal para su uso en servidores y backends de alto rendimiento (por ejemplo, con NestJS).
 
+- **Entrada de Datos Flexible**: Procesa un string en formato YAML.
+- **Salida en Memoria**: Genera un Buffer de Node.js con el contenido del PDF, sin tocar el sistema de archivos.
+- **Rendimiento Nativo**: Construido en Rust y expuesto a través de `N-API` para una comunicación casi instantánea con el runtime de Node.js.
+- **Auto-contenido**: Las plantillas HTML están incrustadas en el binario final, simplificando el despliegue.
+
+## Principales Diferencias con la Versión Original
+
+Esta variante fue rediseñada específicamente para casos de uso de backend.
+
+| Característica | Versión Original (CLI) | Esta Versión (Node.js Addon) | Ventaja |
+| :--- | :--- | :--- | :--- |
+| **Ejecución** | Interfaz de Línea de Comandos (binario) | Importado como un módulo (`.node`) | Integración directa en código JS/TS |
+| **Entrada** | Ruta a un archivo `.yml` | `String` con contenido YAML | Evita I/O de disco, ideal para APIs |
+| **Salida** | Archivos `.html` y `.pdf` en disco | `Buffer` de Node.js en memoria | Permite enviar el PDF en una respuesta HTTP |
+| **Despliegue** | Binario + carpeta de plantillas | Un solo archivo `.node` | Despliegue atómico y simplificado |
+
+---
+
+## 🚀 Uso (Ejemplo con TypeScript/NestJS)
+
+La principal ventaja de este motor es su facilidad de integración. La biblioteca expone una única función asíncrona: `renderCvNative`.
+
+1.  **Importar el Módulo**: Una vez compilado, importa el archivo `.node` en tu servicio.
+
+2.  **Llamar a la función**: Pásale el contenido del CV en un string YAML y el nombre de la plantilla deseada.
+
+```typescript
+import { renderCvNative } from '../path/to/your/addon.node';
+import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Response } from 'express';
+
+// DTO para validar la entrada
+class GenerateCvDto {
+  template: 'modern' | 'dark' | 'base';
+  yamlData: string;
+}
+
+@Controller('cv')
+export class CvController {
+  @Post('generate')
+  async generateCv(@Body() body: GenerateCvDto, @Res() res: Response) {
+    try {
+      // Llama a la función nativa de Rust
+      const pdfBuffer: Buffer = await renderCvNative(body.yamlData, body.template);
+
+      // Envía el PDF directamente en la respuesta HTTP
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=cv.pdf');
+      res.send(pdfBuffer);
+
+    } catch (error) {
+      // Manejo de errores
+      console.error('Error generating CV:', error);
+      res.status(500).send({ message: 'Failed to generate CV' });
+    }
+  }
+}
 ```
-    _   __ ___     _   __ ____     ______ _    __
-   / | / //   |   / | / // __ \   / ____/| |  / /
-  /  |/ // /| |  /  |/ // / / /  / /     | | / /
- / /|  // ___ | / /|  // /_/ /  / /___   | |/ /
-/_/ |_//_/  |_|/_/ |_/ \____/   \____/   |___/
-```
 
-Un motor de renderizado de CV ultrarrápido escrito en Rust, optimizado como un componente de backend sin estado. Esta variante "in-memory" está diseñada para ser invocada por un orquestador (p. ej., un servicio Nest.js), recibiendo datos por `stdin` y devolviendo un PDF por `stdout`, garantizando máxima velocidad y eficiencia sin acceso a disco.
-
-## 🏛️ Arquitectura y Contexto de Uso
-
-Este proyecto no es una aplicación de usuario final, sino un **componente de backend especializado**. Está diseñado para el siguiente flujo de trabajo:
-
-1.  **Frontend (Next.js):** Un usuario solicita la generación de su CV a través de una interfaz web.
-2.  **Orquestador (Nest.js):** El backend recibe la solicitud. Lee los datos del CV del usuario (desde una base de datos o un archivo `.yml`) y los carga en memoria.
-3.  **Ejecución del Motor (Este proyecto):** El orquestador invoca el binario compilado de `fast_nano_cv_engine_memory` como un proceso hijo.
-    -   Le pasa los datos del CV a través de la **tubería `stdin`**.
-    -   Captura el resultado binario (los bytes del archivo PDF) directamente desde la **tubería `stdout`**.
-4.  **Respuesta al Cliente:** El orquestador envía el PDF capturado de vuelta al frontend para su descarga o visualización.
-
-Este enfoque evita por completo las operaciones de entrada/salida de disco durante la generación, lo que lo hace ideal para entornos de servidor de alto rendimiento.
-
-## ✨ Características Principales
-
-*   **Procesamiento In-Memory:** Recibe datos YAML por `stdin` y emite un PDF por `stdout`, sin tocar el sistema de archivos.
-*   **Sin Estado y Portátil:** El binario es autocontenido, con las plantillas HTML incrustadas, lo que facilita su despliegue.
-*   **Rendimiento Nativo:** Construido en Rust para una generación casi instantánea.
-*   **Motor de Plantillas:** Personaliza la apariencia de tu CV usando el motor de plantillas [Tera](https://keats.github.io/tera/).
-*   **Plantillas Incluidas:** Viene con tres temas listos para usar: `base`, `dark` y `modern`.
+---
 
 ## ⚙️ Cómo Funciona
 
-El motor sigue un proceso simple y eficiente optimizado para la integración con otros servicios:
+El flujo de procesamiento es directo y eficiente:
 
-`Datos YAML (vía stdin)` → `Motor Rust` → `Renderizado con Plantilla Incrustada` → `Bytes del PDF (vía stdout)`
+1.  **Llamada desde Node.js**: Se invoca `renderCvNative(yamlString, templateName)`.
+2.  **Parseo**: El string YAML es deserializado por `serde_yaml` en una estructura `CV` de Rust fuertemente tipada.
+3.  **Renderizado HTML**: El motor de plantillas `Tera` usa la estructura `CV` para rellenar la plantilla HTML correspondiente (cargada desde los assets embebidos).
+4.  **Generación de PDF**: La librería `headless_chrome` se lanza en segundo plano, carga el HTML a través de un data-uri y "imprime" la página a un PDF.
+5.  **Retorno**: El contenido del PDF se devuelve como un `Vec<u8>` en Rust, que se convierte en un `Buffer` de Node.js para el consumidor.
 
-## 📋 Prerrequisitos
+---
 
-1.  **Rust y Cargo:** Para compilar el proyecto. Puedes instalarlo desde [rustup.rs](https://rustup.rs/).
-2.  **Google Chrome / Chromium:** La generación de PDF depende de `headless_chrome`, por lo que es necesario tener el navegador instalado en el entorno donde se ejecute el binario.
+## 🛠️ Compilación del Proyecto
 
-## 🚀 Instalación y Compilación
+Para compilar el proyecto y generar el archivo `.node`, necesitas tener instalado `Node.js` y `Rust`.
 
-1.  **Clona el Repositorio:**
+1.  **Instalar dependencias de N-API**:
     ```bash
-    git clone https://github.com/Kakarot-Caracter/fast_nano_cv_engine_memory.git
-    cd fast_nano_cv_engine_memory
+    npm install
     ```
 
-2.  **Construye para Producción:**
-    Este comando compila el proyecto con optimizaciones.
+2.  **Construir el addon nativo**:
+    Este comando compila el código Rust y coloca el archivo `.node` en la raíz del proyecto.
     ```bash
-    cargo build --release
+    npx napi build --release
     ```
+    Para desarrollo, puedes omitir el flag `--release` para una compilación más rápida pero no optimizada.
 
-El binario ejecutable final se ubicará en `target/release/fast_nano_cv_engine_memory`.
+El archivo resultante (ej. `fast_nano_cv_engine_memory.node`) es el que debes importar en tu proyecto de Node.js.
 
-## USAGE
+## 📁 Estructura del Proyecto
 
-El binario está diseñado para ser usado con tuberías (`pipes`). Se le debe pasar el contenido del archivo YAML a través de `stdin` y el PDF resultante será emitido a `stdout`.
+-   `src/lib.rs`: El corazón de la librería. Define la función `render_cv_native` expuesta a Node.js y orquesta todo el flujo.
+-   `src/models/cv.rs`: Define las estructuras de datos de Rust (`CV`, `Personal`, etc.) que mapean el formato del YAML.
+-   `src/parser/yaml.rs`: Lógica para deserializar el string YAML en las estructuras `CV`.
+-   `src/render/html.rs`: Usa `Tera` para renderizar el HTML a partir de los datos.
+-   `src/render/pdf.rs`: Convierte el string HTML en un buffer de bytes PDF usando `headless_chrome`.
+-   `src/templates/`: Plantillas HTML (`base.html`, `dark.html`, `modern.html`) que se incrustan en el binario final.
+-   `Cargo.toml`: Manifiesto del proyecto Rust, donde se definen las dependencias clave como `napi`, `serde`, `tera` y `headless_chrome`.
+-   `package.json`: Define las dependencias de desarrollo de Node.js, principalmente para el CLI de `napi-rs`.
 
-### Sintaxis del Comando
-
-```bash
-cat <archivo_yaml> | ./target/release/fast_nano_cv_engine_memory [--template <nombre>] > <archivo_salida.pdf>
-```
-
-| Argumento              | Descripción                                                                                                |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `stdin`                | **(Requerido)** Contenido del archivo YAML que se pasa al proceso.                                          |
-| `--template <nombre>` | **(Opcional)** El nombre de la plantilla a usar (`base`, `dark`, `modern`). Por defecto, es `base`.     |
-| `stdout`               | **(Requerido)** El flujo de salida donde se recibirán los bytes del PDF.                                   |
-
-
-### Ejemplos de Uso
-
-1.  **Generar CV con la plantilla por defecto (`base`):**
-    ```bash
-    cat cv.yml | ./target/release/fast_nano_cv_engine_memory > output/giovanni_martinez_cv.pdf
-    ```
-
-2.  **Generar CV usando la plantilla `modern`:**
-    ```bash
-    cat cv.yml | ./target/release/fast_nano_cv_engine_memory --template modern > output/cv_modern.pdf
-    ```
-
-3.  **Integración en un script de Node.js (ejemplo para el orquestador):**
-    ```javascript
-    const { spawn } = require('child_process');
-    const fs = require('fs');
-    const path = require('path');
-
-    async function generatePdf(yamlData, template = 'base') {
-      const binaryPath = path.resolve('./target/release/fast_nano_cv_engine_memory');
-      const args = ['--template', template];
-      
-      return new Promise((resolve, reject) => {
-        const process = spawn(binaryPath, args);
-        const pdfChunks = [];
-        
-        process.stdout.on('data', (chunk) => {
-          pdfChunks.push(chunk);
-        });
-
-        process.stderr.on('data', (data) => {
-          // Ideal para logging
-          console.error(`[stderr]: ${data}`);
-        });
-
-        process.on('close', (code) => {
-          if (code === 0) {
-            resolve(Buffer.concat(pdfChunks));
-          } else {
-            reject(new Error(`El proceso terminó con código ${code}`));
-          }
-        });
-
-        // Escribir los datos YAML en stdin y cerrar la tubería
-        process.stdin.write(yamlData);
-        process.stdin.end();
-      });
-    }
-
-    // Uso
-    const yamlContent = fs.readFileSync('cv.yml', 'utf-8');
-    generatePdf(yamlContent, 'modern').then(pdfBuffer => {
-      fs.writeFileSync('cv_from_node.pdf', pdfBuffer);
-      console.log('PDF generado desde Node.js!');
-    });
-    ```
-
-## 📄 Formato del Archivo YAML
-
-El formato del archivo `cv.yml` no ha cambiado. Sigue utilizando la misma estructura para definir las secciones `personal`, `sobre_mi`, `educacion`, `experiencia` y `habilidades`.
-
-*(La sección detallada del formato YAML del README anterior sigue siendo válida y puede consultarse como referencia).*
-
-## 🎨 Plantillas Personalizadas
-
-Para añadir o modificar plantillas:
-
-1.  Edita o añade un nuevo archivo `.html` en la carpeta `src/templates/`.
-2.  El sistema `RustEmbed` automáticamente incluirá los cambios en el binario la próxima vez que compiles con `cargo build`.
-3.  Ejecuta el programa apuntando a tu nueva plantilla con el flag `--template`.
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Si tienes ideas para mejorar el proyecto, por favor abre un *issue* para discutirlo o envía un *pull request*.
-
-## 📜 Licencia
+## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
